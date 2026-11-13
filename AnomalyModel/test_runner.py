@@ -42,7 +42,8 @@ for file in os.listdir(image_dir):
 
         if frame is not None:
             print(f"--- Kamera analizuje klatkę: {file} ---")
-            alerts = process_frame(frame, camera_id=f"CAM_TEST")
+            # ZMIANA TUTAJ:
+            alerts = process_frame(frame, camera_id=f"CAM_TEST", is_video=False)
 
             if alerts:
                 for a in alerts:
