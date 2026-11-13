@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Monitoringu Multi-Cam</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: white; text-align: center; padding: 20px; }
+        #cameras-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .camera-box {
+            background: #1e1e1e; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        video { width: 100%; border-radius: 5px; background: #000; }
+        .cam-title { margin-bottom: 10px; font-size: 14px; color: #888; word-break: break-all; }
+        .no-cameras { grid-column: 1 / -1; color: #888; margin-top: 50px; font-size: 18px; }
+    </style>
+</head>
+<body>
+<h2>Monitoring na żywo (Wszystkie kamery)</h2>
+<div id="cameras-grid">
+    <div class="no-cameras" id="empty-state">Oczekiwanie na sygnał z kamer...</div>
+</div>
+
+<script>
+    const url = 'http://localhost:8088/'
+    const grid = document.getElementById('cameras-grid');
+    const emptyState = document.getElementById('empty-state');
+
+    let currentPlayback = {};
+
+    async function fetchActiveCameras() {
+        try {
+            const response = await fetch(url+'api/camera/active-cameras');
+            if (!response.ok) return;
+
+            const activeCameras = await response.json(); // Pobiera mapę z backendu
+            const currentUuids = Object.keys(activeCameras);
+
+            emptyState.style.display = currentUuids.length > 0 ? 'none' : 'block';
+
+            for (const [uuid, fileName] of Object.entries(activeCameras)) {
+                let camBox = document.getElementById('cam-' + uuid);
+
+                if (!camBox) {
+                    camBox = document.createElement('div');
+                    camBox.className = 'camera-box';
+                    camBox.id = 'cam-' + uuid;
+                    camBox.innerHTML = `
+                            <div class="cam-title">Kamera: ${uuid.split('-')[0]}...</div>
+                            <video id="video-${uuid}" autoplay muted></video>
+                        `;
+                    grid.appendChild(camBox);
+                }
+
+                if (currentPlayback[uuid] !== fileName) {
+                    currentPlayback[uuid] = fileName;
+                    const videoElement = document.getElementById('video-' + uuid);
+                    videoElement.src = url+'api/camera/stream/' + fileName;
+                    videoElement.play().catch(e => console.log("Oczekiwanie na autoodtwarzanie"));
+                }
+            }
+
+            const existingBoxes = document.querySelectorAll('.camera-box');
+            existingBoxes.forEach(box => {
+                const boxUuid = box.id.replace('cam-', '');
+                if (!currentUuids.includes(boxUuid)) {
+                    grid.removeChild(box);
+                    delete currentPlayback[boxUuid];
+                }
+            });
+
+        } catch (error) {
+            console.error("Błąd połączenia z serwerem", error);
+        }
+    }
+
+    setInterval(fetchActiveCameras, 3000);
+    fetchActiveCameras();
+</script>
+</body>
+</html>

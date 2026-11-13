@@ -9,7 +9,7 @@ export default function App() {
   const cameraRef = useRef<CameraView>(null); 
   const isRecordingRef = useRef(false);
 
-  const BASE_URL = 'http://192.168.1.49:8088/api/camera/upload';
+  const BASE_URL = 'http://192.168.1.49:8088/api/camera';
 
   useEffect(() => {
     (async () => {
@@ -41,14 +41,14 @@ export default function App() {
 
   const handleRecord = async () => {
     if (isRecordingRef.current) {
-      // Zatrzymywanie
+      
       isRecordingRef.current = false;
       setIsRecording(false);
       if (cameraRef.current) {
         cameraRef.current.stopRecording();
       }
     } else {
-      // Rozpoczynanie nowej sesji
+      
       isRecordingRef.current = true;
       setIsRecording(true);
       
@@ -61,7 +61,7 @@ export default function App() {
         const uuid = await response.text();
         console.log('Otrzymano UUID sesji:', uuid);
         
-        // Uruchom pętlę i przekaż jej UUID
+        
         startRecordingLoop(uuid);
         
       } catch (error) {
