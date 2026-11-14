@@ -85,7 +85,7 @@ SentinelVision/
 │   ├── src/main/resources/static/index.html # Web Dashboard
 │   └── Dockerfile         # Java application build instructions
 ├── AnomalyModel/          # AI source code (Python)
-│   ├── analyzer.py        # YOLO script + Kafka Consumer
+│   ├── detector.py        # YOLO script + Kafka Consumer
 │   ├── requirements.txt   # Python dependencies
 │   └── Dockerfile         # AI environment build instructions
 └── MobileApp/             # React Native App (Expo)
