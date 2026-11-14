@@ -9,7 +9,7 @@ export default function App() {
   const cameraRef = useRef<CameraView>(null); 
   const isRecordingRef = useRef(false);
 
-  const BASE_URL = 'http://192.168.1.49:8088/api/camera';
+  const BASE_URL = 'http://192.168.1.101:8088/api/camera';
 
   useEffect(() => {
     (async () => {

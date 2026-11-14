@@ -30,9 +30,30 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  backend:
+    build: 
+      context: ./Backend
+    container_name: vision_backend
+    ports:
+      - "8088:8088" 
+    depends_on:
+      - postgres
+      - kafka
+    volumes:
+      - ./uploads:/app/uploads
+
+  analyzer:
+    build:
+      context: ./AnomalyModel
+    container_name: vision_analyzer
+    depends_on:
+      - kafka
+    volumes:
+      - ./uploads:/app/uploads
 
 volumes:
   postgres_data:
