@@ -1,6 +1,8 @@
 package pk.computer.vision.backend.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +20,8 @@ import org.springframework.http.MediaType;
 @RequestMapping("/api/camera")
 @CrossOrigin(origins = "*")
 public class VideoController {
-
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
     private static final String UPLOAD_DIR = "uploads/videos/";
 
     @GetMapping("/hello")
@@ -47,6 +50,10 @@ public class VideoController {
             Path filePath = Paths.get(UPLOAD_DIR + fileName);
 
             Files.write(filePath, file.getBytes());
+            // Poinformowanie Pythona o nowym pliku
+            String jsonMessage = String.format("{\"session_id\":\"%s\", \"file_path\":\"%s\"}",
+                    sessionId, filePath.toAbsolutePath().toString().replace("\\", "/"));
+            kafkaTemplate.send("video_uploads", jsonMessage);
 
             return ResponseEntity.ok("Plik przesłany. Sesja: " + sessionId);
         } catch (IOException e) {
