@@ -50,7 +50,6 @@ public class VideoController {
             Path filePath = Paths.get(UPLOAD_DIR + fileName);
 
             Files.write(filePath, file.getBytes());
-            // Poinformowanie Pythona o nowym pliku
             String jsonMessage = String.format("{\"session_id\":\"%s\", \"file_path\":\"%s\"}",
                     sessionId, filePath.toAbsolutePath().toString().replace("\\", "/"));
             kafkaTemplate.send("video_uploads", jsonMessage);

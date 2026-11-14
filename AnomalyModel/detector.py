@@ -18,7 +18,7 @@ track_history = defaultdict(list)
 HISTORY_LENGTH = 5
 CROWD_THRESHOLD = 3
 
-# Producent Kafka (wysyła alerty)
+
 try:
     producer = KafkaProducer(
         bootstrap_servers=[KAFKA_URL],
@@ -174,7 +174,6 @@ def process_video_file(file_path, session_id):
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS)) or 30
 
-    # Ścieżka dla oznakowanego pliku wideo
     out_path = file_path.replace(".mp4", "_alert.mp4")
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(out_path, fourcc, fps, (frame_width, frame_height))
@@ -195,14 +194,12 @@ def process_video_file(file_path, session_id):
     cap.release()
     out.release()
 
-    # Jeśli film nie zawierał zagrożeń, usuwamy wygenerowany plik z ramkami, żeby oszczędzić dysk
     if not event_detected:
         os.remove(out_path)
     else:
         print(f"Zapisano oznaczony film ze zdarzeniem: {out_path}")
 
 
-# Nasłuchiwanie na nowe pliki od Spring Boot
 def start_kafka_consumer():
     if not KAFKA_AVAILABLE:
         print("Brak połączenia z Kafką. Analiza zatrzymana.")

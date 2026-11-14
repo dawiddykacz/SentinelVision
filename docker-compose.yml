@@ -30,25 +30,22 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # Kafka przedstawia się teraz wewnątrz sieci jako "kafka"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
-  # Nasza aplikacja w Spring Boot
   backend:
     build: 
       context: ./Backend
     container_name: vision_backend
     ports:
-      - "8088:8088" # Lub 8080, zależy jak masz w application.properties
+      - "8088:8088" 
     depends_on:
       - postgres
       - kafka
     volumes:
-      - shared_videos:/app/uploads # Współdzielony folder na wideo
+      - ./uploads:/app/uploads
 
-  # Nasz skrypt Python z YOLO
   analyzer:
     build:
       context: ./AnomalyModel
@@ -56,8 +53,7 @@ services:
     depends_on:
       - kafka
     volumes:
-      - shared_videos:/app/uploads # Ten sam współdzielony folder!
+      - ./uploads:/app/uploads
 
 volumes:
   postgres_data:
-  shared_videos: # Definicja wspólnego dysku dla Javy i Pythona
